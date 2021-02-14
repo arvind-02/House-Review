@@ -19,7 +19,7 @@ const Map = () => {
     const [note, setNote] = useState({});
     const [notes, setNotes] = useState({});
     const [searchHistory, setSearchHistory] = useState([]);
-
+    const [currentBNBs, setCurrentBNBs] = useState([]);
     const [selectedBNB, setSelectedBNB] = useState({});
 
     useEffect(() => {
@@ -58,10 +58,17 @@ const Map = () => {
                 console.log(e.shapes[0])
                 var p = e.shapes[0].getProperties();
                 var position = e.shapes[0].getCoordinates();
-                var html = `
-                    <div class="popup">
-                        <h4>${p.address.freeformAddress}</h4>
-                    </div>`;
+                if (p.address.airBNB) {
+                    var html = `
+                        <div class="popup">
+                            <h4><a href="${p.address.freeformAddress}">${p.address.freeformAddress}</a></h4>
+                        </div>`;
+                } else {
+                    var html = `
+                        <div class="popup">
+                            <h4>${p.address.freeformAddress}</h4>
+                        </div>`;
+                }
                 popup.setPopupOptions({
                     content: html,
                     position: position
@@ -73,6 +80,7 @@ const Map = () => {
                     bnbData["numPeople"] = p.address.numPeople;
                     bnbData["price"] = p.address.price;
                     bnbData["reviews"] = p.address.reviews;
+                    bnbData["sentiment"] = p.address.sentiment
                     console.log(bnbData);
                     setSelectedBNB(bnbData);
                 } else {
@@ -141,6 +149,7 @@ const Map = () => {
                             }
                         };
                         datasource.add(rawGeoJson);
+
                         map.setCamera({
                             bounds: [results.position.lon - 0.001, results.position.lat - 0.0005,
                             results.position.lon + 0.001, results.position.lat + 0.0005]
@@ -156,8 +165,15 @@ const Map = () => {
             let res = await fetch(`/api/reviewParser?minPeople=${airBNB.minPeople}&maxPeople=${airBNB.maxPeople}&minPrice=${airBNB.minPrice}&maxPrice=${airBNB.maxPrice}&minScore=${airBNB.minScore}&maxScore=${airBNB.maxScore}`);
             let text = await res.text();
             let json = JSON.parse(text);
-            console.log(json);
             if (datasource) {
+                let toRemove = [];
+                for (let id of datasource.toJson().features) {
+                    if (id.properties.address.airBNB) {
+                        toRemove.push(id.id);
+                    }
+                }
+                datasource.remove(toRemove)
+                setCurrentBNBs(json);
                 for (let id in json) {
                     var rawGeoJson = {
                         "type": "Feature",
@@ -172,6 +188,7 @@ const Map = () => {
                                 "reviews": json[id][0],
                                 "numPeople": json[id][3],
                                 "price": json[id][4],
+                                "sentiment": json[id][5]
                             }
                         }
                     };
@@ -244,6 +261,7 @@ const Map = () => {
                     <h3><a href={selectedBNB.freeformAddress}>{selectedBNB.freeformAddress}</a></h3>
                     <p>Price: {selectedBNB.price}</p>
                     <p>Number of Occupants: {selectedBNB.numPeople}</p>
+                    <p>Sentiment: {selectedBNB.sentiment}</p>
                     <p style={{fontWeight: "bold"}}>Reviews</p>
                     <ul>
                         {selectedBNB.reviews.map((review, idx) => (
