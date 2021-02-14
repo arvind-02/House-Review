@@ -2,11 +2,14 @@ import logging
 
 import azure.functions as func
 
+import csv
 import openai
 import requests
 from requests.auth import HTTPBasicAuth
 import sys
 import pathlib
+import json
+
 
 def create_prompt(reviews, new_reviews, stop="###"):
 	prompt = "This is a review sentiment classifier:\n"
@@ -37,6 +40,7 @@ def create_prompt(reviews, new_reviews, stop="###"):
 	prompt += "1."
 	return prompt
 
+
 def extract_sentiments(sentiment_str, choices):
 	result = []
 	start = 0
@@ -44,7 +48,7 @@ def extract_sentiments(sentiment_str, choices):
 		choice = 0
 		choice_ind = len(sentiment_str)
 		for i in range(len(choices)):
-			ind = sentiment_str.find(choices[i],start)
+			ind = sentiment_str.find(choices[i], start)
 			if ind >= start and ind < choice_ind:
 				choice = i
 				choice_ind = ind
@@ -53,11 +57,13 @@ def extract_sentiments(sentiment_str, choices):
 		start = choice_ind + len(choices[choice])
 	return result
 
-def validate_reviews(reviews,choices):
+
+def validate_reviews(reviews, choices):
 	for review, sentiment in reviews:
 		if sentiment not in choices:
 			return False
 	return True
+
 
 def predict_sentiments(choices, new_reviews):
 	openai.organization = "org-RXpPxgGjA0O57LrS2a82hECn"
@@ -77,11 +83,11 @@ def predict_sentiments(choices, new_reviews):
     		   	"Negative")
     		   ]
 
-	if not validate_reviews(reviews,choices):
+	if not validate_reviews(reviews, choices):
 		print("Invalid reference review sentiments")
 
 	stop = "###"
-	prompt = create_prompt(reviews,new_reviews,stop)
+	prompt = create_prompt(reviews, new_reviews, stop)
 	response = openai.Completion.create(
     	engine="davinci",
     	prompt=prompt,
@@ -92,35 +98,62 @@ def predict_sentiments(choices, new_reviews):
     	presence_penalty=0.0,
 		stop=stop
     )
-    
+
 	sentiments = extract_sentiments(response["choices"][0]["text"], choices)
-	return sentiments[:min(len(new_reviews),len(sentiments))]
+	return sentiments[:min(len(new_reviews), len(sentiments))]
+
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info(func)
-    logging.info('Python HTTP trigger function processed a request.')
+    minPeople = int(req.params.get('minPeople'))
+    maxPeople = int(req.params.get('maxPeople'))
+    minPrice = float(req.params.get('minPrice'))
+    maxPrice = float(req.params.get('maxPrice'))
+    minScore = float(req.params.get('minScore'))
 
+    idToRev = {}
+    with open(pathlib.Path(__file__).parent / "reviews1.csv", 'r') as f:
+        for line in csv.reader(f):
+            if line[0].isnumeric():
+                if int(line[0]) in idToRev:
+                    idToRev[int(line[0])].append(line[5])
+                else:
+                    idToRev[int(line[0])] = [line[5]]
+
+    idToLatLong = {}
+    idToURL = {}
+    idToNumPeople = {}
+    idToPrice = {}
+    ids = []
+    numDone = 0
+    MAX_PLACES = 2
+    with open(pathlib.Path(__file__).parent / "listings.csv", 'r') as f:
+        for line in csv.reader(f):
+            if numDone > MAX_PLACES:
+                break
+            if line[0].isnumeric():
+                price = float(line[60][1:].replace(',', ''))
+                numPeople = int(line[53])
+                if (numPeople <= maxPeople and numPeople >= minPeople and price >= minPrice and price <= maxPrice):
+                    idToLatLong[int(line[0])] = [float(line[48]), float(line[49])]
+                    idToURL[int(line[0])] = str(line[1])
+                    idToNumPeople[int(line[0])] = numPeople
+                    idToPrice[int(line[0])] = price
+                    ids.append(int(line[0]))
+                    numDone+=1
+    idToData = {}
     choices = ["Positive", "Neutral", "Negative"]
-    new_reviews = ["I like how this apartment is very spacious",
-                    "Very dark, not enough sunlight",
-                    "This house is very clean and organized",
-                    "Definitely on the expensive side, but neat. Currently unsure",
-                    "Not a fan of the service",
-                    "This apartment is overpriced.",
-                    "Community is great. People with dogs dont always clean up after them but staff has been on them about that. Some neighbors dont have their dogs on leashes when they take them out and others have loud dogs that we can hear from our apartment.",
-                    "The apartment is not bad, though I am a little leery of the price."]
-    name = req.params.get('name')
-    f = open(pathlib.Path(__file__).parent / 'test.txt', "r")
-    # sentiments = predict_sentiments(choices, new_reviews)
-    # logging.info(sentiments)
-    # for choice in choices:
-    #     percent = round(100*sentiments.count(choice) / len(sentiments))
-    #     logging.info(f"{choice} reviews: {percent}%")
-
-    if name:
-        return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
-    else:
-        return func.HttpResponse(
-             f"This HTTP triggered function executed successfully. {f.read()} Pass a name in the query string or in the request body for a personalized response.",
-             status_code=200
-        )
+    for i in ids:
+        if (i not in idToRev):
+            continue
+        reviews = idToRev[i]
+        if (len(reviews) > 5):
+            reviews = reviews[:5]
+        sentiments = predict_sentiments(choices, reviews)
+        score = round(100*sentiments.count(choices[0]) / len(sentiments))
+        if (score >= minScore):
+            idToData[i] = (reviews, idToLatLong[i], idToURL[i], idToNumPeople[i], idToPrice[i])
+    return func.HttpResponse(
+        json.dumps(idToData),
+        mimetype="application/json",
+        status_code=200
+    )

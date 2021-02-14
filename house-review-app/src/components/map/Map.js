@@ -5,20 +5,22 @@ const Map = () => {
     const [datasource, setDatasource] = useState(null);
     const [map, setMap] = useState(null);
     const [searchAddress, setSearchAddress] = useState({
-        addressLine1: "2949 Bell Blvd",
+        addressLine1: null,
         addressLine2: null,
-        city: "Bayside",
-        state: "NY",
-        zipcode: "11360",
-        country: "USA"
+        city: null,
+        state: null,
+        zipcode: null,
+        country: null
     });
-    const [zillowURL, setZillowURL] = useState(null);
+    const [airBNB, setAirBNB] = useState({});
     const [popupOpen, setPopupOpen] = useState(false);
     const [selectedJSON, setSelectedJSON] = useState(null);
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [note, setNote] = useState({});
     const [notes, setNotes] = useState({});
     const [searchHistory, setSearchHistory] = useState([]);
+
+    const [selectedBNB, setSelectedBNB] = useState({});
 
     useEffect(() => {
         if (localStorage.getItem("notes")) {
@@ -65,9 +67,19 @@ const Map = () => {
                     position: position
                 });
                 popup.open(newMap);
-                setPopupOpen(true);
-                setSelectedAddress(p.address.freeformAddress)
-                setSelectedJSON(e.shapes[0].data);
+                if (p.address.airBNB) {
+                    let bnbData = {};
+                    bnbData["freeformAddress"] = p.address.freeformAddress;
+                    bnbData["numPeople"] = p.address.numPeople;
+                    bnbData["price"] = p.address.price;
+                    bnbData["reviews"] = p.address.reviews;
+                    console.log(bnbData);
+                    setSelectedBNB(bnbData);
+                } else {
+                    setPopupOpen(true);
+                    setSelectedAddress(p.address.freeformAddress)
+                    setSelectedJSON(e.shapes[0].data);
+                }
             });
             for (let json of JSON.parse(localStorage.getItem("searchHistory"))) {
                 newDatasource.add(json);
@@ -80,10 +92,6 @@ const Map = () => {
         let oldSearch = searchAddress;
         oldSearch[e.target.name] = e.target.value;
         setSearchAddress(oldSearch);
-    }
-
-    const handleZillowInput = (e) => {
-        setZillowURL(e.target.value);
     }
 
     const stringifySearchAddress = () => {
@@ -138,18 +146,38 @@ const Map = () => {
                             results.position.lon + 0.001, results.position.lat + 0.0005]
                         });
                     }
-
                 })
             }
         }
     }
 
-    const handleZillowSearch = async () => {
+    const handleAirBNBSearch = async () => {
         try {
-            let res = await fetch("/api/reviewParser");
+            let res = await fetch(`/api/reviewParser?minPeople=${airBNB.minPeople}&maxPeople=${airBNB.maxPeople}&minPrice=${airBNB.minPrice}&maxPrice=${airBNB.maxPrice}&minScore=${airBNB.minScore}`);
             let text = await res.text();
-            console.log(text);
-            // let json = await res.json();
+            let json = JSON.parse(text);
+            console.log(json);
+            if (datasource) {
+                for (let id in json) {
+                    var rawGeoJson = {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [json[id][1][1], json[id][1][0]]
+                        },
+                        "properties": {
+                            "address": {
+                                "freeformAddress": json[id][2],
+                                "airBNB": true,
+                                "reviews": json[id][0],
+                                "numPeople": json[id][3],
+                                "price": json[id][4],
+                            }
+                        }
+                    };
+                    datasource.add(rawGeoJson);
+                }
+            }
         } catch(err) {
             console.log(err);
         }
@@ -169,11 +197,19 @@ const Map = () => {
         localStorage.setItem("searchHistory", JSON.stringify(oldSearchHistory));
     }
 
+    const handleAirBNBInput = (e) => {
+        let oldAirBNB = airBNB;
+        oldAirBNB[e.target.name] = e.target.value;
+        setAirBNB(oldAirBNB);
+    }
+
+
     return (
         <div>
             <div id="map"></div>
             <div className="dashboard">
                 <div className="searchForm">
+                    <p>Your notes</p>
                     <input name="addressLine1" className="formInput" placeholder="Address Line 1" onChange={handleInput}></input>
                     <input name="addressLine2" className="formInput" placeholder="Address Line 2" onChange={handleInput}></input>
                     <input name="city" className="formInput" placeholder="City" onChange={handleInput}></input>
@@ -184,8 +220,13 @@ const Map = () => {
                 </div>
                 <div><h1>OR</h1></div>
                 <div className="searchForm">
-                    <input name="addressLine1" className="formInput" placeholder="Zillow URL" onChange={handleZillowInput}></input>
-                    <button className="formInput formButton" onClick={handleZillowSearch}>Search</button>
+                    <p>AirBNB</p>
+                    <input name="minPrice" className="formInput" placeholder="Minimum Price" onChange={handleAirBNBInput}></input>
+                    <input name="maxPrice" className="formInput" placeholder="Maximum Price" onChange={handleAirBNBInput}></input>
+                    <input name="minPeople" className="formInput" placeholder="Minimum Occupants" onChange={handleAirBNBInput}></input>
+                    <input name="maxPeople" className="formInput" placeholder="Maximum Occupants" onChange={handleAirBNBInput}></input>
+                    <input name="minScore" className="formInput" placeholder="Minimum Score" onChange={handleAirBNBInput}></input>
+                    <button className="formInput formButton" onClick={handleAirBNBSearch}>Search</button>
                 </div>
             </div>
             {popupOpen &&
@@ -194,6 +235,20 @@ const Map = () => {
                     <h3>{selectedAddress}</h3>
                     <textarea placeholder="Add a note" rows="10" cols="50" onChange={handleNoteInput} value={notes[selectedAddress]}></textarea>
                     <button className="formInput formButton" onClick={saveNote}>Add Note</button>
+                </div>
+            }
+            {selectedBNB.reviews && 
+                <div className="airBNB">
+                    <hr></hr>
+                    <h3><a href={selectedBNB.freeformAddress}>{selectedBNB.freeformAddress}</a></h3>
+                    <p>Price: {selectedBNB.price}</p>
+                    <p>Number of Occupants: {selectedBNB.numPeople}</p>
+                    <p style={{fontWeight: "bold"}}>Reviews</p>
+                    <ul>
+                        {selectedBNB.reviews.map((review, idx) => (
+                            review === "." ? null : <li key={idx}>{review}</li>
+                        ))}
+                    </ul>
                 </div>
             }
         </div>
