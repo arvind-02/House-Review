@@ -298,7 +298,7 @@ const Map = () => {
                 <div className="noteForm">
                     <hr></hr>
                     <h3>{selectedAddress}</h3>
-                    <textarea placeholder="Add a note" rows="10" cols="50" onChange={handleNoteInput}>value={notes[selectedAddress]}</textarea>
+                    <textarea placeholder="Add a note" rows="10" cols="50" onChange={handleNoteInput}>{notes[selectedAddress]}</textarea>
                     <button className="formInput formButton" onClick={saveNote}>Add Note</button>
                 </div>
             }
