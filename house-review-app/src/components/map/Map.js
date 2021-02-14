@@ -165,6 +165,24 @@ const Map = () => {
 
     const handleAirBNBSearch = async () => {
         try {
+            if (!airBNB.minPeople) {
+                airBNB.minPeople = 0;
+            }
+            if (!airBNB.maxPeople) {
+                airBNB.maxPeople = 1000
+            }
+            if (!airBNB.minPrice) {
+                airBNB.minPrice = 0
+            }
+            if (!airBNB.maxPrice) {
+                airBNB.maxPrice = 1000
+            }
+            if (!airBNB.minSent) {
+                airBNB.minScore = 0
+            }
+            if (!airBNB.maxSent) {
+                airBNB.maxScore = 1
+            }
             let res = await fetch(`/api/reviewParser?minPeople=${airBNB.minPeople}&maxPeople=${airBNB.maxPeople}&minPrice=${airBNB.minPrice}&maxPrice=${airBNB.maxPrice}&minScore=${airBNB.minScore}&maxScore=${airBNB.maxScore}`);
             let text = await res.text();
             let json = JSON.parse(text);
