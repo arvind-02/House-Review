@@ -66,8 +66,8 @@ def validate_reviews(reviews, choices):
 
 
 def predict_sentiments(choices, new_reviews):
-	openai.organization = "org-RXpPxgGjA0O57LrS2a82hECn"
-	openai.api_key = "sk-bdqIulkQ3ddHuBtc6Sx7lyRbqOJ2SmAK23WtxGNW"
+	openai.organization = "org-8NXhOCMcghGLJOumnG62SWh1"
+	openai.api_key = "sk-hkLYOFvStc3NgQKLWmXlCnrF858whicNIIgPTZP3"
 
 	reviews = [("I loved the new Batman movie!",
 				"Positive"),
