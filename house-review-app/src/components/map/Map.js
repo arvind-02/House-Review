@@ -263,6 +263,7 @@ const Map = () => {
 
     return (
         <div>
+            <h1 style = {{textAlign: 'center'}}>Happy Listings</h1>
             <div id="map"></div>
             <div className="dashboard">
                 <div className="searchForm">
@@ -315,6 +316,7 @@ const Map = () => {
                     </ul>
                 </div>
             }
+            <div style={{margin: '1rem'}}>Icons made by <a href="https://www.flaticon.com/authors/vectors-market" title="Vectors Market">Vectors Market</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
         </div>
     );
 }
