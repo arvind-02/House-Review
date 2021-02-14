@@ -62,6 +62,9 @@ const Map = () => {
                     var html = `
                         <div class="popup">
                             <h4><a href="${p.address.freeformAddress}">${p.address.freeformAddress}</a></h4>
+                            <p>Overall Sentiment: ${p.address.sentiment}</a></p>
+                            <p>Occupants: ${p.address.numPeople}</a></p>
+                            <p>Price: ${p.address.price}</a></p>
                         </div>`;
                 } else {
                     var html = `
