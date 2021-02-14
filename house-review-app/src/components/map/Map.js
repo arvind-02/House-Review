@@ -144,8 +144,15 @@ const Map = () => {
         }
     }
 
-    const handleZillowSearch = () => {
-
+    const handleZillowSearch = async () => {
+        try {
+            let res = await fetch("/api/reviewParser");
+            let text = await res.text();
+            console.log(text);
+            // let json = await res.json();
+        } catch(err) {
+            console.log(err);
+        }
     }
 
     const handleNoteInput = (e) => {
