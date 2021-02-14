@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import './Map.css';
+import house from '../../house.png';
 
 const Map = () => {
     const [datasource, setDatasource] = useState(null);
@@ -263,7 +264,7 @@ const Map = () => {
 
     return (
         <div>
-            <h1 style = {{textAlign: 'center'}}>Happy Listings</h1>
+            <h1 style = {{textAlign: 'center'}}><img src={house} alt="house icon"/>Happy Listings<img src={house} alt="house icon"/></h1>
             <div id="map"></div>
             <div className="dashboard">
                 <div className="searchForm">
