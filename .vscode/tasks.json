@@ -2,23 +2,6 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "shell",
-			"label": "npm install",
-			"command": "npm install",
-			"options": {
-				"cwd": "${workspaceFolder}/api"
-			}
-		},
-		{
-			"type": "shell",
-			"label": "npm prune",
-			"command": "npm prune --production",
-			"problemMatcher": [],
-			"options": {
-				"cwd": "${workspaceFolder}/api"
-			}
-		},
-		{
 			"type": "func",
 			"command": "host start",
 			"problemMatcher": "$func-python-watch",
