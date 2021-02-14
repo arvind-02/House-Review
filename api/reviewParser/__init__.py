@@ -97,6 +97,7 @@ def predict_sentiments(choices, new_reviews):
 	return sentiments[:min(len(new_reviews),len(sentiments))]
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info(func)
     logging.info('Python HTTP trigger function processed a request.')
 
     choices = ["Positive", "Neutral", "Negative"]
