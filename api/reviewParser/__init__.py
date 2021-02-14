@@ -148,10 +148,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         reviews = idToRev[i]
         if (len(reviews) > 5):
             reviews = reviews[:5]
-        sentiments = predict_sentiments(choices, reviews)
-        score = round(100*sentiments.count(choices[0]) / len(sentiments))
-        if (score >= minScore):
-            idToData[i] = (reviews, idToLatLong[i], idToURL[i], idToNumPeople[i], idToPrice[i])
+        # sentiments = predict_sentiments(choices, reviews)
+        # score = round(100*sentiments.count(choices[0]) / len(sentiments))
+        # if (score >= minScore):
+        idToData[i] = (reviews, idToLatLong[i], idToURL[i], idToNumPeople[i], idToPrice[i])
     return func.HttpResponse(
         json.dumps(idToData),
         mimetype="application/json",
