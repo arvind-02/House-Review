@@ -153,7 +153,7 @@ const Map = () => {
 
     const handleAirBNBSearch = async () => {
         try {
-            let res = await fetch(`/api/reviewParser?minPeople=${airBNB.minPeople}&maxPeople=${airBNB.maxPeople}&minPrice=${airBNB.minPrice}&maxPrice=${airBNB.maxPrice}&minScore=${airBNB.minScore}`);
+            let res = await fetch(`/api/reviewParser?minPeople=${airBNB.minPeople}&maxPeople=${airBNB.maxPeople}&minPrice=${airBNB.minPrice}&maxPrice=${airBNB.maxPrice}&minScore=${airBNB.minScore}&maxScore=${airBNB.maxScore}`);
             let text = await res.text();
             let json = JSON.parse(text);
             console.log(json);
@@ -226,6 +226,7 @@ const Map = () => {
                     <input name="minPeople" className="formInput" placeholder="Minimum Occupants" onChange={handleAirBNBInput}></input>
                     <input name="maxPeople" className="formInput" placeholder="Maximum Occupants" onChange={handleAirBNBInput}></input>
                     <input name="minScore" className="formInput" placeholder="Minimum Score" onChange={handleAirBNBInput}></input>
+                    <input name="maxScore" className="formInput" placeholder="Maximum Score" onChange={handleAirBNBInput}></input>
                     <button className="formInput formButton" onClick={handleAirBNBSearch}>Search</button>
                 </div>
             </div>
