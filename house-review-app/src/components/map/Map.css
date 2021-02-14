@@ -1,0 +1,85 @@
+#map {
+    width: 100%;
+    height: 30rem;
+}
+
+.dashboard {
+    margin: 1rem;
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.dashboard h1 {
+    position: relative;
+}
+
+.dashboard h1:after {
+    content: '';
+    position: absolute;
+    border-left: 2px solid green;
+    left: 50%;
+    bottom: 90%;
+    height: 200%;
+}
+
+.dashboard h1:before {
+    content: '';
+    position: absolute;
+    border-left: 2px solid green;
+    left: 50%;
+    top: 90%;
+    height: 200%;
+}
+
+.searchForm {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 40%;
+}
+
+.formInput {
+    margin-bottom: 0.5rem;
+}
+
+.formButton {
+    position: relative;
+    background-color: rgba(128, 128, 128, 0.329);
+    border: none;
+    border-top: 2px solid green;
+    border-bottom-left-radius: 0.3rem;
+    border-bottom-right-radius: 0.3rem;
+}
+
+.formButton:hover {
+    background-color: rgba(128, 128, 128, 0.877);
+}
+
+.popup-content-container {
+    box-shadow: none !important;
+}
+
+.popup {
+    border: none;
+    margin: 0.5rem;
+    margin-right: 1.4rem;
+}
+
+.noteForm {
+    margin: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.noteForm hr {
+    width: 100%;
+}
+
+.noteForm textarea {
+    margin-bottom: 0.5rem;
+    line-height: 1rem;
+    z-index: 100;
+}
