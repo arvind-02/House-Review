@@ -290,7 +290,7 @@ const Map = () => {
             <hr></hr>
             <div id="firechat-wrapper">
                 <p>Chat with an owner!</p>
-                <button onClick={() => login()}>Login with Email</button>
+                <button className = "formButton" onClick={() => login()}>Login with Email</button>
             </div>
             {popupOpen &&
                 <div className="noteForm">
