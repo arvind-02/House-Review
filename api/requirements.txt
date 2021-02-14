@@ -5,5 +5,4 @@
 azure-functions
 openai
 requests
-selenium
 pathlib

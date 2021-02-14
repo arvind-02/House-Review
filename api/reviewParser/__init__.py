@@ -110,7 +110,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "Community is great. People with dogs dont always clean up after them but staff has been on them about that. Some neighbors dont have their dogs on leashes when they take them out and others have loud dogs that we can hear from our apartment.",
                     "The apartment is not bad, though I am a little leery of the price."]
     name = req.params.get('name')
-    # f = open(pathlib.Path(__file__).parent / 'test.txt', "r")
+    f = open(pathlib.Path(__file__).parent / 'test.txt', "r")
     # sentiments = predict_sentiments(choices, new_reviews)
     # logging.info(sentiments)
     # for choice in choices:
@@ -121,6 +121,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
     else:
         return func.HttpResponse(
-             f"This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
+             f"This HTTP triggered function executed successfully. {f.read()} Pass a name in the query string or in the request body for a personalized response.",
              status_code=200
         )
