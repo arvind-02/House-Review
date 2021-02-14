@@ -240,7 +240,7 @@ const Map = () => {
                 </div>
                 <div><h1>OR</h1></div>
                 <div className="searchForm">
-                    <p>AirBNB</p>
+                    <p>Apartment Search</p>
                     <input name="minPrice" className="formInput" placeholder="Minimum Price" onChange={handleAirBNBInput}></input>
                     <input name="maxPrice" className="formInput" placeholder="Maximum Price" onChange={handleAirBNBInput}></input>
                     <input name="minPeople" className="formInput" placeholder="Minimum Occupants" onChange={handleAirBNBInput}></input>
