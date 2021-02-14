@@ -92,11 +92,18 @@ const Map = () => {
                     setSelectedJSON(e.shapes[0].data);
                 }
             });
-            for (let json of JSON.parse(localStorage.getItem("searchHistory"))) {
-                newDatasource.add(json);
+            if (localStorage.getItem("searchHistory")) {
+                for (let json of JSON.parse(localStorage.getItem("searchHistory"))) {
+                    newDatasource.add(json);
+                }
             }
         });
         setMap(newMap);
+        window.firebase.auth().onAuthStateChanged(function (user) {
+            if (user) {
+                initChat(user);
+            }
+        });
     }, []);
 
     const handleInput = (e) => {
@@ -216,7 +223,7 @@ const Map = () => {
                     datasource.add(rawGeoJson);
                 }
             }
-        } catch(err) {
+        } catch (err) {
             console.log(err);
         }
     }
@@ -241,6 +248,18 @@ const Map = () => {
         setAirBNB(oldAirBNB);
     }
 
+    const login = () => {
+        var provider = new window.firebase.auth.GoogleAuthProvider();
+        window.firebase.auth().signInWithPopup(provider).catch(function (error) {
+            console.log("Error authenticating user:", error);
+        });
+    }
+
+    const initChat = (user) => {
+        var chatRef = window.firebase.database().ref("chat");
+        var chat = new window.FirechatUI(chatRef, document.getElementById("firechat-wrapper"));
+        chat.setUser(user.uid, user.displayName);
+    }
 
     return (
         <div>
@@ -268,6 +287,11 @@ const Map = () => {
                     <button className="formInput formButton" onClick={handleAirBNBSearch}>Search</button>
                 </div>
             </div>
+            <hr></hr>
+            <div id="firechat-wrapper">
+                <p>Chat with an owner!</p>
+                <button onClick={() => login()}>Login with Email</button>
+            </div>
             {popupOpen &&
                 <div className="noteForm">
                     <hr></hr>
@@ -276,14 +300,14 @@ const Map = () => {
                     <button className="formInput formButton" onClick={saveNote}>Add Note</button>
                 </div>
             }
-            {selectedBNB.reviews && 
+            {selectedBNB.reviews &&
                 <div className="airBNB">
                     <hr></hr>
                     <h3><a href={selectedBNB.freeformAddress}>{selectedBNB.freeformAddress}</a></h3>
                     <p>Price: {selectedBNB.price}</p>
                     <p>Number of Occupants: {selectedBNB.numPeople}</p>
                     <p>Sentiment: {selectedBNB.sentiment}</p>
-                    <p style={{fontWeight: "bold"}}>Reviews</p>
+                    <p style={{ fontWeight: "bold" }}>Reviews</p>
                     <ul>
                         {selectedBNB.reviews.map((review, idx) => (
                             review === "." ? null : <li key={idx}>{review}</li>

@@ -6,7 +6,7 @@
 .dashboard {
     margin: 1rem;
     display: flex;
-    width: 100%;
+    max-width: 100%;
     justify-content: space-around;
     align-items: center;
 }
@@ -38,6 +38,10 @@
     flex-direction: column;
     justify-content: space-around;
     width: 40%;
+}
+
+#firechat-wrapper {
+    margin: 1rem;
 }
 
 .formInput {
